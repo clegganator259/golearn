@@ -6,15 +6,15 @@ import (
 )
 
 type user struct {
-	id        int64
-	username  string
-	password  string
-	createdAt time.Time
+	Id        int64
+	Username  string
+	Password  string
+	CreatedAt time.Time
 }
 
 type UserRepository interface {
-	createUser(username string, password string) (*user, error)
-	getUserById(id int64) (*user, error)
+	CreateUser(username string, password string) (*user, error)
+	GetUserById(id int64) (*user, error)
 }
 
 type sqliteUserRepository struct {
@@ -34,7 +34,7 @@ func NewSqliteRepo(connection_string string) (UserRepository, error) {
 	return &sqliteUserRepository{db}, nil
 }
 
-func (repo sqliteUserRepository) createUser(username string, password string) (*user, error) {
+func (repo sqliteUserRepository) CreateUser(username string, password string) (*user, error) {
 	createdAt := time.Now()
 	result, err := repo.db.Exec(`INSERT INTO users (username, password, created_at) values (?, ?, ?)`, username, password, createdAt)
 	if err != nil {
@@ -45,18 +45,18 @@ func (repo sqliteUserRepository) createUser(username string, password string) (*
 		return nil, err
 	}
 	new_user := &user{
-		id:        newId,
-		username:  username,
-		password:  password,
-		createdAt: createdAt,
+		Id:        newId,
+		Username:  username,
+		Password:  password,
+		CreatedAt: createdAt,
 	}
 	return new_user, nil
 }
 
-func (repo sqliteUserRepository) getUserById(id int64) (*user, error) {
+func (repo sqliteUserRepository) GetUserById(id int64) (*user, error) {
 	user := user{}
 	query := "SELECT rowid, username, password, created_at FROM users WHERE rowid = ?"
-	err := repo.db.QueryRow(query, id).Scan(&user.id, &user.username, &user.password, &user.createdAt)
+	err := repo.db.QueryRow(query, id).Scan(&user.Id, &user.Username, &user.Password, &user.CreatedAt)
 	if err != nil {
 		return nil, err
 	}
